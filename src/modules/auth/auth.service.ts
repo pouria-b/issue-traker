@@ -1,0 +1,52 @@
+import { PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcryptjs";
+import { normEmail, RegisterSchema, LoginSchema } from "../../utils/validators";
+import { signAccessToken, signRefreshToken } from "../../utils/jwt";
+import { sendVerificationEmail} from "../../utils/email";
+import { v4 as randomUUID } from 'uuid';
+import { env } from "../../config/env";
+import jwt from "jsonwebtoken";
+import { AuthUser } from "./auth.types";
+
+const prisma = new PrismaClient();
+
+export const register = async (username: string, email: string, password: string) => {
+  RegisterSchema.parse({ username, email, password });
+  const [byUser, byEmail] = await Promise.all([
+    prisma.user.findUnique({ where: { username: username.trim() } }),
+    prisma.user.findUnique({ where: { email: normEmail(email) } }),
+  ]);
+  if (byUser) throw new Error("نام کاربری وجود دارد");
+  if (byEmail) throw new Error("ایمیل وجود دارد");
+  const passwordHash = await bcrypt.hash(password, 10);
+  const user = await prisma.user.create({
+    data: { username: username.trim(), email: normEmail(email), passwordHash},
+  });
+  
+  return { message: "ثبت‌نام با موفقیت انجام شد" };
+};
+
+export const login = async (identifier: string, password: string, rememberMe: boolean = false) => {
+  LoginSchema.parse({ identifier, password });
+  const user = identifier.includes("@")
+    ? await prisma.user.findUnique({ where: { email: normEmail(identifier) } })
+    : await prisma.user.findUnique({ where: { username: identifier.trim() } });
+  if (!user) throw new Error("اعتبارنامه‌های نامعتبر");
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) throw new Error("اعتبارنامه‌های نامعتبر");
+  const access = signAccessToken({ id: user.id, username: user.username, email: user.email } as AuthUser);
+  const refresh = signRefreshToken({ id: user.id, username: user.username, email: user.email } as AuthUser, rememberMe);
+  return { access, refresh, username: user.username };
+};
+
+
+export const refreshAccessToken = async (refreshToken: string) => {
+  try {
+    const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as { sub: string; username: string; email: string };
+    const user = await prisma.user.findUnique({ where: { id: decoded.sub } });
+    if (!user) throw new Error("کاربر یافت نشد");
+    return signAccessToken({ id: user.id, username: user.username, email: user.email } as AuthUser);
+  } catch {
+    throw new Error("رفرش توکن نامعتبر");
+  }
+};

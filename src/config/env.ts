@@ -1,0 +1,19 @@
+import "dotenv/config";
+import { z } from "zod";
+import type { SignOptions } from "jsonwebtoken";
+
+const envSchema = z.object({
+  NODE_ENV: z.string().default("development"),
+  PORT: z.coerce.number().default(3000),
+  JWT_ACCESS_SECRET: z.string().min(1, "JWT_ACCESS_SECRET الزامی است"),
+  JWT_ACCESS_EXPIRES: z.string().optional().default("1h"),
+  JWT_REFRESH_SECRET: z.string().min(1, "JWT_REFRESH_SECRET الزامی است"),
+  JWT_REFRESH_EXPIRES_LONG: z.string().optional().default("30d"), 
+  JWT_REFRESH_EXPIRES_SHORT: z.string().optional().default("4h"), 
+  EMAIL_USER: z.string().min(1, "EMAIL_USER الزامی است"),
+  EMAIL_PASS: z.string().min(1, "EMAIL_PASS الزامی است"),
+  APP_URL: z.string().url("APP_URL باید URL معتبر باشد"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL الزامی است"),
+  });
+
+export const env = envSchema.parse(process.env);

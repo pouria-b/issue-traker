@@ -41,7 +41,7 @@ model User {
   issuesCreated  Issue[]         @relation("IssuesCreated")
   issuesAssigned Issue[]         @relation("IssuesAssigned")
   comments       Comment[]
-  memberships    ProjectMember[]
+  memberships    ProjectMember[] 
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }

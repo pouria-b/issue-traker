@@ -1,4 +1,3 @@
-// Minimal Comment Controller
 import { Request, Response } from "express";
 import { createComment, updateOwnComment, deleteOwnComment } from "./comment.service";
 import { ApiResponse, CreateCommentRequest, UpdateCommentRequest, CommentDTO } from "./comment.types";

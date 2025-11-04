@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
 import { Request, Response, NextFunction } from "express";
 import { AuthUser } from "./auth.types";
+import { GlobalRole } from "@prisma/client";
 
 
 /**
@@ -26,8 +27,8 @@ export function auth(req: Request, res: Response, next: NextFunction) {
   }
 
   try {
-    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as { sub: string; username: string; email: string };
-    (req as AuthRequest).user = { id: decoded.sub, username: decoded.username, email: decoded.email };
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as { sub: string; username: string; email: string ; role: GlobalRole};
+    (req as AuthRequest).user = { id: decoded.sub, username: decoded.username, email: decoded.email, role: decoded.role };
     next();
   } catch (error) {
     (req as AuthRequest).user = undefined;

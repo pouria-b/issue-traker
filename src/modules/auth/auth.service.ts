@@ -10,7 +10,7 @@ import { AuthUser } from "./auth.types";
 
 const prisma = new PrismaClient();
 
-export const register = async (username: string, email: string, password: string) => {
+export const Signup = async (username: string, email: string, password: string) => {
   RegisterSchema.parse({ username, email, password });
   const [byUser, byEmail] = await Promise.all([
     prisma.user.findUnique({ where: { username: username.trim() } }),
@@ -34,18 +34,18 @@ export const login = async (identifier: string, password: string, rememberMe: bo
   if (!user) throw new Error("اعتبارنامه‌های نامعتبر");
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) throw new Error("اعتبارنامه‌های نامعتبر");
-  const access = signAccessToken({ id: user.id, username: user.username, email: user.email } as AuthUser);
-  const refresh = signRefreshToken({ id: user.id, username: user.username, email: user.email } as AuthUser, rememberMe);
+  const access = signAccessToken({ id: user.id, username: user.username, email: user.email, role: user.role } as AuthUser);
+  const refresh = signRefreshToken({ id: user.id, username: user.username, email: user.email, role: user.role, } as AuthUser, rememberMe);
   return { access, refresh, username: user.username };
 };
 
 
 export const refreshAccessToken = async (refreshToken: string) => {
   try {
-    const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as { sub: string; username: string; email: string };
+    const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as { sub: string; username: string; email: string; role: string };
     const user = await prisma.user.findUnique({ where: { id: decoded.sub } });
     if (!user) throw new Error("کاربر یافت نشد");
-    return signAccessToken({ id: user.id, username: user.username, email: user.email } as AuthUser);
+    return signAccessToken({ id: user.id, username: user.username, email: user.email, role: user.role } as AuthUser);
   } catch {
     throw new Error("رفرش توکن نامعتبر");
   }

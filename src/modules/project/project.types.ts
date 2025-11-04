@@ -1,37 +1,49 @@
+export type IssueStatus = "OPEN" | "IN_PROGRESS" | "CLOSED";
+export type IssuePriority = "LOW" | "MEDIUM" | "HIGH";
+export type ProjectRole = "ADMIN" | "MEMBER";
+
 export interface CreateProjectRequest {
-  name?: string;
-  description?: string;
+  name: string;
+  description?: string | null;
   members?: string[];
 }
-//inja bayad updatedAt ezafe beshe vali hanoz motmaen nistam koza!!!
+
+export interface IssueMiniDTO {
+  id: string;
+  title: string;
+  status: IssueStatus;
+  priority: IssuePriority;
+}
+
+export interface MemberMiniDTO {
+  userId: string;
+  username: string;
+  roleInProject: ProjectRole;
+}
+
+export interface OwnerMiniDTO {
+  id: string;
+  username: string;
+  firstname: string | null;
+  lastname: string | null;
+}
+
 export interface ProjectDTO {
   id: string;
+  name: string;
   description: string | null;
   createdAt: string;
-   //updatedAt: string;
-  members?: { userId: string; username: string }[];
+  user: OwnerMiniDTO; 
+  isOwner: boolean; 
+  members: MemberMiniDTO[];
+  issues: IssueMiniDTO[];
 }
 
-export interface ProjectResponse {
-  id: string;
-  description: string | null;
-  createdAt: string;
-  //updatedAt: string;
-  user: {
-    id: string;
-    username: string;
-    firstname: string | null;
-    lastname: string | null;
-  };
-  isOwner?: boolean;
-  members?: { userId: string; username: string }[];
-  issues?: string[];
-}
-
-export interface ProjectApiResponse {
-  success: boolean;
-  message: string;
-  data?: ProjectResponse;
+export interface PageMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface CreateProjectResponse {
@@ -40,22 +52,18 @@ export interface CreateProjectResponse {
   data?: ProjectDTO;
 }
 
-export interface ValidateAllResponse {
+export interface ProjectApiResponse {
   success: boolean;
   message: string;
-  data?: { description?: string | null; members?: string | null; issues?: string | null };
+  data?: ProjectDTO;
 }
 
-export interface UserProjectResponse {
+export interface UserProjectsResponse {
   success: boolean;
   message: string;
   data?: {
-    user: {
-      id: string;
-      username: string;
-      firstname: string | null;
-      lastname: string | null;
-    };
-    Project: ProjectResponse[];
+    user: OwnerMiniDTO;
+    projects: ProjectDTO[];
+    meta: PageMeta;
   };
 }

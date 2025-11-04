@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 import * as authService from './auth.service';
-import { validateLogin, validateRegister} from './auth.validator';
+import { validateLogin, validateSignup} from './auth.validator';
 import { clearAuthCookies, setAuthCookies, refreshCookieName } from '../../utils/jwt';
-import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from './auth.types';
+import { LoginRequest, LoginResponse, SignupRequest, SignupResponse } from './auth.types';
 import { handleError } from '../../utils/errorHandler';
 
-export async function register(req: Request<{}, {}, RegisterRequest>, res: Response<RegisterResponse>) {
+export async function Signup(req: Request<{}, {}, SignupRequest>, res: Response<SignupResponse>) {
   try {
-    const error = validateRegister(req.body);
+    const error = validateSignup(req.body);
     if (error) return res.status(400).json({ success: false, message: error });
-    await authService.register(req.body.username, req.body.email, req.body.password);
+    await authService.Signup(req.body.username, req.body.email, req.body.password);
     return res.status(201).json({ success: true, message: 'کاربر ثبت نام شد. ایمیل تأیید ارسال شد.' });
   } catch (error) {
     return handleError(error, res, 'خطای داخلی');

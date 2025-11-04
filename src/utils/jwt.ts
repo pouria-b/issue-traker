@@ -40,13 +40,13 @@ function parseExpires(value: string): SignOptions["expiresIn"] {
 }
 
 export function signAccessToken(user: AuthUser) {
-  const payload = { sub: user.id, username: user.username, email: user.email };
+  const payload = { sub: user.id, username: user.username, email: user.email, role: user.role };
   const options: SignOptions = { expiresIn: parseExpires(env.JWT_ACCESS_EXPIRES || "1h") };
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, options);
 }
 
 export function signRefreshToken(user: AuthUser, rememberMe: boolean = false) {
-  const payload = { sub: user.id, username: user.username, email: user.email };
+  const payload = { sub: user.id, username: user.username, email: user.email, role: user.role };
   const expiresIn = rememberMe ? env.JWT_REFRESH_EXPIRES_LONG : env.JWT_REFRESH_EXPIRES_SHORT;
   const options: SignOptions = { expiresIn: parseExpires(expiresIn || "4h") };
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, options);

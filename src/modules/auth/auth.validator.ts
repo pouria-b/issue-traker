@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { RegisterSchema, LoginSchema } from "../../utils/validators";
-import { LoginRequest, RegisterRequest } from "./auth.types";
+import { LoginRequest, SignupRequest } from "./auth.types";
 
-export const validateRegister = ({ username, email, password }: RegisterRequest): string | null => {
+export const validateSignup = ({ username, email, password }: SignupRequest): string | null => {
   try {
     RegisterSchema.parse({ username, email, password });
     return null;
